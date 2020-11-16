@@ -5,11 +5,11 @@ from PIL import Image
 import os
 import os.path
 import sys
-
+import pandas as pd
 
 def pil_loader(path):
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
-    with open(path, 'rb') as f:
+    with open("/content/Caltech101/101_ObjectCategories/"+path, 'rb') as f:
         img = Image.open(f)
         return img.convert('RGB')
 
@@ -30,7 +30,7 @@ class Caltech(VisionDataset):
         - Labels should start from 0, so for Caltech you will have lables 0...100 (excluding the background class) 
         '''
         self.txt_list = self.split+".txt"    #train.txt or test.txt
-        df = pd.read_csv(self.txt_list, sep=' ', index_col=0)
+        df = pd.read_csv("/content/Caltech101/"+self.txt_list, sep=' ', index_col=0)
         self.img_names = df.index.values
         self.root = root
         self.transform = transform
@@ -38,11 +38,11 @@ class Caltech(VisionDataset):
         self.classes = classes
         self.class_to_idx = class_to_idx
         self.samples = []
-        for(i in self.img_names):
+        for i in self.img_names:
             c_name = i.split("/")[0]
-            c_id = class_to_idx[c_name]
             if(c_name != "BACKGROUND_Google"):
-                samples.append(tuple(i, c_id))
+                c_id = class_to_idx[c_name]
+                self.samples.append(tuple((i, c_id)))
 
     def get_image_from_folder(self, name):
         """
@@ -55,7 +55,7 @@ class Caltech(VisionDataset):
         image = Image.open(os.path.join(self.root, name))
         return image
 
-    def _find_classes(self, dir: str) -> Tuple[List[str], Dict[str, int]]:
+    def _find_classes(self, dir: str):
         """
         Finds the class folders in a dataset.
 
@@ -86,7 +86,7 @@ class Caltech(VisionDataset):
         image, label = self.samples[index] # Provide a way to access image and label via index
                                            # Image should be a PIL Image
                                            # label can be int
-        image = self.get_image_from_folder(image)
+        image = pil_loader(image)
 
         # Applies preprocessing when accessing the image
         if self.transform is not None:
