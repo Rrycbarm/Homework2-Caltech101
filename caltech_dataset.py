@@ -38,7 +38,7 @@ class Caltech(VisionDataset):
         self.classes = classes
         self.class_to_idx = class_to_idx
         self.samples = []
-        for(i of self.img_names)
+        for(i in self.img_names):
             c_name = i.split("/")[0]
             c_id = class_to_idx[c_name]
             if(c_name != "BACKGROUND_Google"):
